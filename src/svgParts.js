@@ -411,8 +411,14 @@ const ChooseNewBoxText = styled.text`
 const RESET_BUTTON_OFFSET_X = 50;
 const RESET_BUTTON_OFFSET_Y = 60;
 
+const ResetButtonGroup = styled.g`
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
 export const ResetButton = ({ onClick }) => (
-  <g onClick={onClick}>
+  <ResetButtonGroup onClick={onClick}>
     <rect
       x={GRID_OFFSET + BOX_SIZE * 10 + RESET_BUTTON_OFFSET_X}
       y={GRID_OFFSET + RESET_BUTTON_OFFSET_Y}
@@ -429,5 +435,5 @@ export const ResetButton = ({ onClick }) => (
     >
       Velg ny rute
     </ChooseNewBoxText>
-  </g>
+  </ResetButtonGroup>
 );
