@@ -11,6 +11,7 @@ export const APP_HEIGHT = 600;
 const Header = styled.h1`
   /* color: #11F; */
   font-size: 40px;
+  font-family: 'Open Sans', sans-serif;
 `;
 
 function App() {
