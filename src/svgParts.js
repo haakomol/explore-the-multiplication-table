@@ -242,7 +242,7 @@ export const XLegendNumbers = ({ highlightedNumber = 0 }) => (
         x={GRID_OFFSET + n * BOX_SIZE - BOX_SIZE / 2}
         y={GRID_OFFSET - 23}
         textAnchor="middle"
-        alignmentBaseline="central"
+        dominantBaseline="central"
         isHighlighted={highlightedNumber === n}
       >
         {n}
@@ -259,7 +259,7 @@ export const YLegendNumbers = ({ highlightedNumber = 0 }) => (
         x={GRID_OFFSET - 14}
         y={GRID_OFFSET + n * BOX_SIZE - BOX_SIZE / 2}
         textAnchor="end"
-        alignmentBaseline="central"
+        dominantBaseline="central"
         isHighlighted={highlightedNumber === n}
       >
         {n}
@@ -320,7 +320,7 @@ export const YFactorMeasurement = ({ yFactor }) => (
     />
     <LegendNumbersText
       textAnchor="end"
-      alignmentBaseline="middle"
+      dominantBaseline="middle"
       x={GRID_OFFSET - 23}
       y={GRID_OFFSET + 2 + (BOX_SIZE * yFactor) / 2}
     >
@@ -343,7 +343,7 @@ export const MultiplicationFormula = ({
   <FormulaText
     x={GRID_OFFSET + BOX_SIZE * 10 + FORMULA_OFFSET_X}
     y={GRID_OFFSET + FORMULA_OFFSET_Y}
-    alignmentBaseline="middle"
+    dominantBaseline="middle"
     smallFont={smallFont}
   >
     {xFactor} ⋅ {yFactor} = {revealProduct ? product : '?'}
@@ -393,7 +393,7 @@ export const AnimatedCountNumbers = ({ xFactor, yFactor, onComplete }) => {
         x={GRID_OFFSET + xCor * BOX_SIZE + boxTextOffset}
         y={GRID_OFFSET + yCor * BOX_SIZE + boxTextOffset}
         textAnchor="middle"
-        alignmentBaseline="central"
+        dominantBaseline="central"
         lastOne={i + 1 === product}
       >
         {i + 1}
