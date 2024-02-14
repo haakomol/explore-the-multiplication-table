@@ -13,10 +13,9 @@ import {
   AREA_RECT_STROKE_WIDTH,
   AREA_RECT_FILL_COLOR_SELECTED,
   AREA_RECT_STROKE_COLOR_SELECTED,
-  PRODUCT_BOX_FILL_COLOR_SELECTED,
   PRODUCT_BOX_FILL_COLOR_HOVER,
   HIGHLIGHTED_LEGEND_NUMBER_COLOR,
-} from './constants';
+} from '../constants';
 import { TweenMax, Back, Sine } from 'gsap';
 
 export const svgGrid = (
@@ -178,7 +177,7 @@ export const svgGrid = (
   </g>
 );
 
-export const HoverUnderlayFillRect = ({
+export const HoverFillRectUnderlay = ({
   xFactor,
   yFactor,
   isSelected,
@@ -212,11 +211,11 @@ export const HoverUnderlayFillRect = ({
 
 const LegendNumbersText = styled.text`
   font-size: 20px;
-  fill: ${props =>
+  fill: ${(props) =>
     props.isHighlighted ? HIGHLIGHTED_LEGEND_NUMBER_COLOR : 'inherit'};
 `;
 
-export const HoverOverlayStrokeRect = ({ xFactor, yFactor, isSelected }) => (
+export const HoverStrokeRectOverlay = ({ xFactor, yFactor, isSelected }) => (
   <rect
     x={GRID_OFFSET}
     y={GRID_OFFSET}
@@ -236,7 +235,7 @@ export const HoverOverlayStrokeRect = ({ xFactor, yFactor, isSelected }) => (
 
 export const XLegendNumbers = ({ highlightedNumber = 0 }) => (
   <g>
-    {Array.from({ length: 10 }, (v, i) => i + 1).map(n => (
+    {Array.from({ length: 10 }, (v, i) => i + 1).map((n) => (
       <LegendNumbersText
         key={n}
         x={GRID_OFFSET + n * BOX_SIZE - BOX_SIZE / 2}
@@ -253,7 +252,7 @@ export const XLegendNumbers = ({ highlightedNumber = 0 }) => (
 
 export const YLegendNumbers = ({ highlightedNumber = 0 }) => (
   <g>
-    {Array.from({ length: 10 }, (v, i) => i + 1).map(n => (
+    {Array.from({ length: 10 }, (v, i) => i + 1).map((n) => (
       <LegendNumbersText
         key={n}
         x={GRID_OFFSET - 14}
@@ -330,7 +329,7 @@ export const YFactorMeasurement = ({ yFactor }) => (
 );
 
 const FormulaText = styled.text`
-  font-size: ${props => (props.smallFont ? '40px' : '60px')};
+  font-size: ${(props) => (props.smallFont ? '40px' : '60px')};
 `;
 
 export const MultiplicationFormula = ({
@@ -352,11 +351,10 @@ export const MultiplicationFormula = ({
 
 const CountNumberText = styled.text`
   font-size: 0px;
-  /* fill: ${props => (props.lastOne ? 'inherit' : 'inherit')}; */
+  /* fill: ${(props) => (props.lastOne ? 'inherit' : 'inherit')}; */
 `;
 
 export const AnimatedCountNumbers = ({ xFactor, yFactor, onComplete }) => {
-  console.log('render AnimatedCountNumbers');
   const product = xFactor * yFactor;
   const boxTextOffset = BOX_SIZE / 2;
 
@@ -367,7 +365,6 @@ export const AnimatedCountNumbers = ({ xFactor, yFactor, onComplete }) => {
   const animatedNumbersRefs = [];
 
   useEffect(() => {
-    console.log('animation effect');
     const animationDuration = 1 + product * 0.035;
     // const staggerDelay = animationDuration / product;
     TweenMax.staggerTo(
@@ -381,15 +378,15 @@ export const AnimatedCountNumbers = ({ xFactor, yFactor, onComplete }) => {
       null,
       onComplete
     );
-  }, []);
+  });
 
-  const animatedNumbers = numbersArray.map(i => {
+  const animatedNumbers = numbersArray.map((i) => {
     const xCor = i % xFactor;
     const yCor = Math.floor(i / xFactor);
     return (
       <CountNumberText
         key={i}
-        ref={countNumberText => (animatedNumbersRefs[i] = countNumberText)}
+        ref={(countNumberText) => (animatedNumbersRefs[i] = countNumberText)}
         x={GRID_OFFSET + xCor * BOX_SIZE + boxTextOffset}
         y={GRID_OFFSET + yCor * BOX_SIZE + boxTextOffset}
         textAnchor="middle"

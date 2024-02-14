@@ -6,137 +6,179 @@ import {
   XFactorMeasurement,
   YFactorMeasurement,
   MultiplicationFormula,
-  HoverUnderlayFillRect,
-  HoverOverlayStrokeRect,
+  HoverFillRectUnderlay,
+  HoverStrokeRectOverlay,
   AnimatedCountNumbers,
   XLegendNumbers,
   YLegendNumbers,
   ResetButton,
-} from './svgParts';
+} from './svg-components/svgParts';
+import { roundToOneDecimal } from './utils';
 
-export function round(value, precision) {
-  var multiplier = Math.pow(10, precision || 0);
-  return Math.round(value * multiplier) / multiplier;
-}
+const exploreModes = {
+  multiplicationTable: 'multiplicationTable',
+  area: 'area',
+};
+
+const multiTableStates = {
+  selectFactors: 'selectFactors',
+  countingAnimation: 'countingAnimation',
+  animationFinished: 'animationFinished',
+};
 
 const MultiGrid = ({ position: { x: xMouse, y: yMouse } }) => {
-  const [isAreaExplore, setIsAreaExplore] = useState(false);
-  const [interactionState, setInteractionState] = useState('hoverSelection');
+  const [exploreMode, setExploreMode] = useState(
+    exploreModes.multiplicationTable
+  );
+  const [multiTableState, setMultiTableState] = useState(
+    multiTableStates.selectFactors
+  );
 
-  const [selectedXFactor, setSelectedXFactor] = useState(0);
-  const [selectedYFactor, setSelectedYFactor] = useState(0);
+  const [selectedXFactorTableMode, setSelectedXFactorTableMode] = useState(0);
+  const [selectedYFactorTableMode, setSelectedYFactorTableMode] = useState(0);
 
   const isMouseWithinGrid =
     xMouse > GRID_OFFSET &&
     xMouse < GRID_OFFSET + BOX_SIZE * 10 &&
-    (yMouse > GRID_OFFSET && yMouse < GRID_OFFSET + BOX_SIZE * 10);
+    yMouse > GRID_OFFSET &&
+    yMouse < GRID_OFFSET + BOX_SIZE * 10;
 
-  let xFactor = interactionState !== 'hoverSelection' ? selectedXFactor : 0;
-  let yFactor = interactionState !== 'hoverSelection' ? selectedYFactor : 0;
+  let xFactor =
+    multiTableState !== multiTableStates.selectFactors
+      ? selectedXFactorTableMode
+      : 0;
+  let yFactor =
+    multiTableState !== multiTableStates.selectFactors
+      ? selectedYFactorTableMode
+      : 0;
 
-  if (!isAreaExplore) {
-    if (isMouseWithinGrid && interactionState === 'hoverSelection') {
-      xFactor = Math.floor((xMouse - GRID_OFFSET) / BOX_SIZE) + 1;
-      yFactor = Math.floor((yMouse - GRID_OFFSET) / BOX_SIZE) + 1;
+  switch (exploreMode) {
+    case exploreModes.multiplicationTable: {
+      if (
+        isMouseWithinGrid &&
+        multiTableState === multiTableStates.selectFactors
+      ) {
+        xFactor = Math.floor((xMouse - GRID_OFFSET) / BOX_SIZE) + 1;
+        yFactor = Math.floor((yMouse - GRID_OFFSET) / BOX_SIZE) + 1;
+      }
+      break;
     }
-  } else {
-    if (isMouseWithinGrid) {
-      xFactor = round((xMouse - GRID_OFFSET) / BOX_SIZE, 1);
-      yFactor = round((yMouse - GRID_OFFSET) / BOX_SIZE, 1);
+    case exploreModes.area: {
+      if (isMouseWithinGrid) {
+        xFactor = roundToOneDecimal((xMouse - GRID_OFFSET) / BOX_SIZE);
+        yFactor = roundToOneDecimal((yMouse - GRID_OFFSET) / BOX_SIZE);
+      }
+      break;
+    }
+    default: {
     }
   }
 
   const handleGridClick = useCallback(() => {
-    if (isMouseWithinGrid && !isAreaExplore) {
-      if (interactionState === 'hoverSelection') {
-        setInteractionState('countToProduct');
-        setSelectedXFactor(xFactor);
-        setSelectedYFactor(yFactor);
-      } else if (interactionState === 'countingFinnished') {
-        setInteractionState('hoverSelection');
-        setSelectedXFactor(0);
-        setSelectedYFactor(0);
+    if (isMouseWithinGrid && exploreMode === exploreModes.multiplicationTable) {
+      if (multiTableState === multiTableStates.selectFactors) {
+        setMultiTableState(multiTableStates.countingAnimation);
+        setSelectedXFactorTableMode(xFactor);
+        setSelectedYFactorTableMode(yFactor);
+      } else if (multiTableState === multiTableStates.animationFinished) {
+        setMultiTableState(multiTableStates.selectFactors);
+        setSelectedXFactorTableMode(0);
+        setSelectedYFactorTableMode(0);
       }
     }
-  }, [isMouseWithinGrid, xFactor, yFactor, interactionState, isAreaExplore]);
+  }, [isMouseWithinGrid, xFactor, yFactor, multiTableState, exploreMode]);
 
   const handleSwitchMode = useCallback(() => {
-    if (interactionState !== 'countToProduct') {
-      setIsAreaExplore(isAreaExplore => !isAreaExplore);
-      setInteractionState('hoverSelection');
+    if (multiTableState !== multiTableStates.countingAnimation) {
+      setExploreMode((interactionMode) =>
+        interactionMode === exploreModes.multiplicationTable
+          ? exploreModes.area
+          : exploreModes.multiplicationTable
+      );
+      setMultiTableState(multiTableStates.selectFactors);
     }
-  }, [interactionState]);
+  }, [multiTableState]);
 
   const showInteractionElements =
-    (interactionState === 'hoverSelection' && isMouseWithinGrid) ||
-    interactionState !== 'hoverSelection';
+    (multiTableState === multiTableStates.selectFactors && isMouseWithinGrid) ||
+    multiTableState !== multiTableStates.selectFactors;
 
-  const svgRender = useMemo(() => {
-    console.log('memo-render MultiGrid');
-    console.log(interactionState);
-    return (
+  const svgRender = useMemo(
+    () => (
       <svg
         viewBox="0 0 950 600"
         xmlns="http://www.w3.org/2000/svg"
         onClick={handleGridClick}
       >
         {showInteractionElements && (
-          <HoverUnderlayFillRect
+          <HoverFillRectUnderlay
             xFactor={xFactor}
             yFactor={yFactor}
-            isSelected={interactionState !== 'hoverSelection'}
-            highlightProductBox={!isAreaExplore}
+            isSelected={multiTableState !== multiTableStates.selectFactors}
+            highlightProductBox={
+              exploreMode === exploreModes.multiplicationTable
+            }
           />
         )}
         {svgGrid}
-        {!isAreaExplore && (
+
+        {exploreMode === exploreModes.multiplicationTable && (
           <>
             <XLegendNumbers highlightedNumber={xFactor} />
             <YLegendNumbers highlightedNumber={yFactor} />
           </>
         )}
+
         {showInteractionElements && (
           <>
-            <HoverOverlayStrokeRect
+            <HoverStrokeRectOverlay
               xFactor={xFactor}
               yFactor={yFactor}
-              isSelected={interactionState !== 'hoverSelection'}
+              isSelected={multiTableState !== multiTableStates.selectFactors}
             />
-            {isAreaExplore && (
+
+            {exploreMode === exploreModes.area && (
               <>
                 <XFactorMeasurement xFactor={xFactor} />
                 <YFactorMeasurement yFactor={yFactor} />
               </>
             )}
+
             <MultiplicationFormula
               xFactor={xFactor}
               yFactor={yFactor}
               product={
-                isAreaExplore ? round(xFactor * yFactor, 2) : xFactor * yFactor
+                exploreMode === exploreModes.area
+                  ? roundToOneDecimal(xFactor * yFactor, 2)
+                  : xFactor * yFactor
               }
               revealProduct={
-                isAreaExplore || interactionState === 'countingFinnished'
+                exploreMode === exploreModes.area ||
+                multiTableState === multiTableStates.animationFinished
               }
-              smallFont={isAreaExplore}
+              smallFont={exploreMode === exploreModes.area}
             />
-            {!isAreaExplore && interactionState !== 'hoverSelection' && (
-              <AnimatedCountNumbers
-                xFactor={xFactor}
-                yFactor={yFactor}
-                onComplete={() => {
-                  if (interactionState !== 'hoverSelection') {
-                    setInteractionState('countingFinnished');
-                  }
-                }}
-              />
-            )}
-            {interactionState === 'countingFinnished' && (
+
+            {exploreMode === exploreModes.multiplicationTable &&
+              multiTableState !== multiTableStates.selectFactors && (
+                <AnimatedCountNumbers
+                  xFactor={xFactor}
+                  yFactor={yFactor}
+                  onComplete={() => {
+                    if (multiTableState !== multiTableStates.selectFactors) {
+                      setMultiTableState(multiTableStates.animationFinished);
+                    }
+                  }}
+                />
+              )}
+
+            {multiTableState === multiTableStates.animationFinished && (
               <ResetButton
                 onClick={() => {
-                  if (interactionState === 'countingFinnished') {
-                    setInteractionState('hoverSelection');
-                    setSelectedXFactor(0);
-                    setSelectedYFactor(0);
+                  if (multiTableState === multiTableStates.animationFinished) {
+                    setMultiTableState(multiTableStates.selectFactors);
+                    setSelectedXFactorTableMode(0);
+                    setSelectedYFactorTableMode(0);
                   }
                 }}
               />
@@ -144,25 +186,26 @@ const MultiGrid = ({ position: { x: xMouse, y: yMouse } }) => {
           </>
         )}
       </svg>
-    );
-  }, [
-    xFactor,
-    yFactor,
-    interactionState,
-    showInteractionElements,
-    handleGridClick,
-    isAreaExplore,
-  ]);
+    ),
+    [
+      xFactor,
+      yFactor,
+      multiTableState,
+      showInteractionElements,
+      handleGridClick,
+      exploreMode,
+    ]
+  );
 
   return (
     <>
       {svgRender}
       <button
         onClick={handleSwitchMode}
-        disabled={interactionState === 'countToProduct'}
+        disabled={multiTableState === multiTableStates.countingAnimation}
         style={{ marginTop: '20px', marginLeft: GRID_OFFSET, fontSize: '18px' }}
       >
-        {isAreaExplore ? 'Utforsk gangetabellen' : 'Utforsk areal'}
+        {exploreMode ? 'Utforsk gangetabellen' : 'Utforsk areal'}
       </button>
     </>
   );
