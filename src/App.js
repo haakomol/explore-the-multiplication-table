@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components/macro';
 import ReactCursorPosition from 'react-cursor-position';
 
-import MultiGrid from './MultiGrid';
+import AppWithMousePosition from './AppWithMousePosition';
 import './App.css';
 
 export const APP_WIDTH = 950;
@@ -22,7 +22,7 @@ function App() {
         </Header>
 
         <ReactCursorPosition>
-          <MultiGrid />
+          <AppWithMousePosition />
         </ReactCursorPosition>
       </div>
     </div>
